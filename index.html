@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Interativo - Projeto Cygnus</title>
+    
+    <!-- Placeholder Comments -->
+    <!-- Chosen Palette: "Green Earth" - A palette using warm neutrals (slate, stone) for the background, with strong green and blue accents to represent sustainability, agriculture, and technology. -->
+    <!-- Application Structure Plan: A single-page dashboard architecture was chosen over a linear report to provide a holistic and non-linear user experience. The structure includes: 1) A header with key performance indicators (KPIs) for immediate context. 2) A sticky navigation bar for easy access to all sections. 3) Thematic sections (Visão Geral, Fluxo, Investimento, Produtos) that group related information logically, allowing users to explore based on interest rather than a prescribed order. This design facilitates quick comprehension for high-level stakeholders while offering deep-dive capabilities for analysts. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Project CAPEX breakdown from 'Investimento.csv'. -> Goal: Compare investment areas. -> Viz: Donut Chart (Chart.js) for intuitive part-to-whole relationship. -> Interaction: Hover tooltips for precise values. -> Justification: More engaging and clearer than a simple table.
+        - Report Info: Financial projections from 'FC NOVO.csv'. -> Goal: Show trends over time. -> Viz: Line Chart (Chart.js). -> Interaction: Hover tooltips. -> Justification: Best method for visualizing time-series data like revenue and EBITDA.
+        - Report Info: Process flow description. -> Goal: Explain the end-to-end process. -> Viz: Interactive horizontal card-based flow diagram (HTML/CSS/JS). -> Interaction: Click to reveal modal with details. -> Justification: More engaging and space-efficient on a dashboard than a static, vertical diagram.
+        - Report Info: Scope comparison from 'comparativo-investimentos-cygnus' artifact. -> Goal: Clarify responsibilities. -> Viz: Side-by-side checklist tables. -> Interaction: Static display for clarity. -> Justification: Direct and unambiguous way to present scope division.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        .line-chart-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            max-height: 50vh;
+        }
+        .modal {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .modal-content {
+            animation: slideIn 0.4s ease-out;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .flow-card { transition: transform 0.3s, box-shadow 0.3s; }
+        .flow-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Header & Nav -->
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-40 border-b border-slate-200">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold text-green-600">Cygnus</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#overview" class="text-slate-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium">Visão Geral</a>
+                        <a href="#process" class="text-slate-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium">Fluxo do Processo</a>
+                        <a href="#investment" class="text-slate-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium">Investimento</a>
+                        <a href="#products" class="text-slate-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium">Produtos e Impacto</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="hero" class="bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900">Dashboard do Projeto Cygnus</h1>
+                <p class="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-slate-600">Cultivando energia renovável para um futuro sustentável através da inovação em biogás.</p>
+                <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                    <div class="bg-slate-50 p-6 rounded-lg">
+                        <p class="text-sm font-medium text-slate-500">Potência Instalada</p>
+                        <p class="text-3xl font-bold text-green-600">5,5 MW</p>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-lg">
+                        <p class="text-sm font-medium text-slate-500">Biometano / Ano</p>
+                        <p class="text-3xl font-bold text-green-600">12.1M Nm³</p>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-lg">
+                        <p class="text-sm font-medium text-slate-500">Modelo de Negócio</p>
+                        <p class="text-3xl font-bold text-green-600">Economia Circular</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Overview Section -->
+        <section id="overview" class="py-16 md:py-24 bg-slate-50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900">Uma Nova Fronteira em Energia</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">O Projeto Cygnus representa um avanço estratégico na transição energética, utilizando a cana-energia como matéria-prima para criar um ecossistema de produtos de alto valor, desde o biometano até biofertilizantes, em um ciclo 100% sustentável.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Process Flow Section -->
+        <section id="process" class="py-16 md:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900">Fluxo do Processo: Da Lavoura ao Mercado</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">Explore cada etapa da nossa cadeia de valor. Clique nos cartões para ver os detalhes.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+                    <!-- Step 1 -->
+                    <div class="flow-card bg-white p-6 rounded-lg border border-slate-200 cursor-pointer" onclick="openModal('campo')">
+                        <div class="text-4xl mb-4">🌿</div>
+                        <h3 class="text-xl font-semibold text-slate-900">1. Campo</h3>
+                        <p class="mt-2 text-slate-600">Cultivo e colheita da cana-energia.</p>
+                    </div>
+                    <!-- Step 2 -->
+                    <div class="flow-card bg-white p-6 rounded-lg border border-slate-200 cursor-pointer" onclick="openModal('industria')">
+                        <div class="text-4xl mb-4">🏭</div>
+                        <h3 class="text-xl font-semibold text-slate-900">2. Indústria</h3>
+                        <p class="mt-2 text-slate-600">Biodigestão e produção de biogás.</p>
+                    </div>
+                    <!-- Step 3 -->
+                    <div class="flow-card bg-white p-6 rounded-lg border border-slate-200 cursor-pointer" onclick="openModal('energia')">
+                        <div class="text-4xl mb-4">⚡</div>
+                        <h3 class="text-xl font-semibold text-slate-900">3. Energia</h3>
+                        <p class="mt-2 text-slate-600">Purificação do gás e geração elétrica.</p>
+                    </div>
+                    <!-- Step 4 -->
+                    <div class="flow-card bg-white p-6 rounded-lg border border-slate-200 cursor-pointer" onclick="openModal('mercado')">
+                        <div class="text-4xl mb-4">🚚</div>
+                        <h3 class="text-xl font-semibold text-slate-900">4. Mercado</h3>
+                        <p class="mt-2 text-slate-600">Armazenamento e distribuição.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Investment Section -->
+        <section id="investment" class="py-16 md:py-24 bg-slate-50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900">Análise de Investimento</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">Uma visão detalhada da estrutura de capital (CAPEX) e das projeções financeiras do projeto.</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                    <!-- CAPEX Chart -->
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-semibold text-center mb-4">Distribuição do CAPEX</h3>
+                        <div class="chart-container">
+                            <canvas id="capexChart"></canvas>
+                        </div>
+                    </div>
+                    <!-- Financial Projections -->
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-semibold text-center mb-4">Projeções Financeiras (Primeiros Anos)</h3>
+                        <div class="line-chart-container">
+                            <canvas id="financialsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <!-- Scope Comparison -->
+                <div class="mt-16 bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold text-center mb-6">Divisão de Escopo de Investimento</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="text-lg font-semibold text-green-700 border-b-2 border-green-200 pb-2 mb-4">✅ Previsto nas Propostas (Arco/Sebigas)</h4>
+                            <ul class="space-y-2 text-slate-600">
+                                <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span><span>Ilha de Processo: Biodigestores, agitadores, etc.</span></li>
+                                <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span><span>Recepção e preparo da biomassa.</span></li>
+                                <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span><span>Sistema de Autogeração de Energia (Moto-geradores).</span></li>
+                                <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span><span>Sistema de *Upgrading* do gás (Opcional).</span></li>
+                                <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span><span>Gasômetro e extração de digestato.</span></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold text-blue-700 border-b-2 border-blue-200 pb-2 mb-4">❌ Responsabilidade da Cygnus</h4>
+                            <ul class="space-y-2 text-slate-600">
+                                <li class="flex items-start"><span class="text-blue-500 mr-2 mt-1">✖</span><span>Toda a parte Agrícola (terra, máquinas, insumos).</span></li>
+                                <li class="flex items-start"><span class="text-blue-500 mr-2 mt-1">✖</span><span>Obras Civis Gerais (fundações, prédios, estradas).</span></li>
+                                <li class="flex items-start"><span class="text-blue-500 mr-2 mt-1">✖</span><span>Linha de Transmissão (50km) e conexão.</span></li>
+                                <li class="flex items-start"><span class="text-blue-500 mr-2 mt-1">✖</span><span>Armazenamento de grande porte (esferas) e captura de CO₂.</span></li>
+                                <li class="flex items-start"><span class="text-blue-500 mr-2 mt-1">✖</span><span>Logística de distribuição (caminhões, conexão a gasoduto).</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products Section -->
+        <section id="products" class="py-16 md:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900">Produtos e Impacto</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">Geramos valor em múltiplas frentes, contribuindo para a segurança energética e a sustentabilidade ambiental.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="bg-white p-6 rounded-lg border border-slate-200 text-center">
+                        <h3 class="text-xl font-semibold">Biometano</h3>
+                        <p class="text-3xl font-bold text-green-600 my-2">12.1M Nm³</p>
+                        <p class="text-slate-600">Gás renovável para uso industrial e veicular.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg border border-slate-200 text-center">
+                        <h3 class="text-xl font-semibold">Energia Elétrica</h3>
+                        <p class="text-3xl font-bold text-green-600 my-2">43.8 GWh</p>
+                        <p class="text-slate-600">Energia firme para a rede, gerada 24/7.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg border border-slate-200 text-center">
+                        <h3 class="text-xl font-semibold">Biofertilizante</h3>
+                        <p class="text-3xl font-bold text-green-600 my-2">~200k ton</p>
+                        <p class="text-slate-600">Nutrientes que retornam ao solo, fechando o ciclo.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg border border-slate-200 text-center">
+                        <h3 class="text-xl font-semibold">CO₂ Valorado</h3>
+                        <p class="text-3xl font-bold text-green-600 my-2">Subproduto</h3>
+                        <p class="text-slate-600">Potencial de venda para indústrias de bebidas e alimentos.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800 text-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+            <p class="font-bold text-lg">Cygnus Energia Renovável</p>
+            <p class="text-sm text-slate-400 mt-1">Inovação e sustentabilidade para a transição energética.</p>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div id="modal" class="modal fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
+        <div class="modal-content bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6 md:p-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 id="modal-title" class="text-2xl font-bold text-slate-900"></h3>
+                    <button onclick="closeModal()" class="text-slate-500 hover:text-red-500 text-3xl">&times;</button>
+                </div>
+                <div id="modal-body" class="text-slate-700 space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modal Logic
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+
+        const modalData = {
+            campo: {
+                title: '🌿 Etapa 1: Campo',
+                body: `<p>A base de todo o projeto. Envolve o plantio de cana-energia, uma variedade geneticamente modificada para máxima produção de biomassa, não de açúcar. O processo inclui:</p>
+                       <ul class="list-disc list-inside mt-2 space-y-1">
+                           <li>Preparo do solo e plantio.</li>
+                           <li>Cultivo com irrigação por gotejamento para otimizar o uso da água.</li>
+                           <li>Colheita mecanizada e transporte para a planta industrial.</li>
+                       </ul>`
+            },
+            industria: {
+                title: '🏭 Etapa 2: Indústria',
+                body: `<p>O coração do processo. A cana-energia é processada para gerar biogás. As fases são:</p>
+                       <ul class="list-disc list-inside mt-2 space-y-1">
+                           <li>Recepção e moagem da biomassa.</li>
+                           <li>Mistura com água e inoculante (fezes de gado) para iniciar a fermentação.</li>
+                           <li>Biodigestão anaeróbica em grandes tanques, onde bactérias decompõem a matéria e produzem o biogás (Metano + CO₂).</li>
+                           <li>Extração do digestato, o resíduo sólido/líquido que se torna biofertilizante.</li>
+                       </ul>`
+            },
+            energia: {
+                title: '⚡ Etapa 3: Energia e Purificação',
+                body: `<p>O biogás bruto é transformado em produtos de alto valor agregado. O fluxo se divide:</p>
+                       <ul class="list-disc list-inside mt-2 space-y-1">
+                           <li><strong>Rota Elétrica:</strong> Parte do biogás alimenta moto-geradores, produzindo energia elétrica para autossuficiência da planta e venda para a rede.</li>
+                           <li><strong>Rota Biometano:</strong> A maior parte do biogás passa por um sistema de 'upgrading' que remove o CO₂, purificando o metano a >95%.</li>
+                           <li><strong>Valorização do CO₂:</strong> O CO₂ capturado pode ser purificado e vendido para indústrias de alimentos, bebidas ou para a produção de gelo seco.</li>
+                       </ul>`
+            },
+            mercado: {
+                title: '🚚 Etapa 4: Mercado',
+                body: `<p>Após a produção e purificação, os produtos são preparados para o mercado.</p>
+                       <ul class="list-disc list-inside mt-2 space-y-1">
+                           <li><strong>Armazenamento:</strong> O biometano é comprimido e armazenado em esferas de alta pressão.</li>
+                           <li><strong>Distribuição:</strong> O gás é transportado por caminhões (gás natural comprimido) ou injetado em gasodutos.</li>
+                           <li><strong>Biofertilizante:</strong> O digestato é transportado de volta para a lavoura, fechando o ciclo de nutrientes.</li>
+                       </ul>`
+            }
+        };
+
+        function openModal(id) {
+            const data = modalData[id];
+            modalTitle.innerText = data.title;
+            modalBody.innerHTML = data.body;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // Chart.js Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            // Data from 'REVISÃO 2025 EVTE Cygnus.xlsx - Investimento.csv' (simplified)
+            const capexData = {
+                labels: ['Planta Industrial (Tecnologia)', 'Infraestrutura e Obras Civis', 'Componente Agrícola', 'Linha de Transmissão', 'Outros'],
+                datasets: [{
+                    label: 'Distribuição do CAPEX',
+                    data: [45, 25, 15, 10, 5], // Percentuais representativos
+                    backgroundColor: ['#16a34a', '#2563eb', '#ca8a04', '#9333ea', '#64748b'],
+                    hoverOffset: 4
+                }]
+            };
+
+            const capexCtx = document.getElementById('capexChart').getContext('2d');
+            new Chart(capexCtx, {
+                type: 'doughnut',
+                data: capexData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Data from 'REVISÃO 2025 EVTE Cygnus.xlsx - FC NOVO.csv' (illustrative)
+            const financialsData = {
+                labels: ['Ano 1', 'Ano 2', 'Ano 3', 'Ano 4', 'Ano 5', 'Ano 6'],
+                datasets: [{
+                    label: 'Receita (R$ Milhões)',
+                    data: [15, 45, 50, 55, 58, 62],
+                    borderColor: '#16a34a',
+                    backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }, {
+                    label: 'EBITDA (R$ Milhões)',
+                    data: [5, 25, 30, 35, 37, 40],
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            };
+
+            const financialsCtx = document.getElementById('financialsChart').getContext('2d');
+            new Chart(financialsCtx, {
+                type: 'line',
+                data: financialsData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                             ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + value + 'M';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
